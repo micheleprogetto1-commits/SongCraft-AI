@@ -2,17 +2,8 @@ name: Download Freesound Audio
 
 on:
   workflow_dispatch:
-    inputs:
-      query:
-        description: "Freesound search query"
-        required: false
-        default: "gaming music"
-      max_files:
-        description: "Maximum number of files to download"
-        required: false
-        default: "1500"
   schedule:
-    - cron: "0 3 * * 1"
+    - cron: "*/15 * * * *" # GIRA AUTOMATICAMENTE OGNI 15 MINUTI (IL MASSIMO CONSENTITO)
 
 permissions:
   contents: write
@@ -45,20 +36,18 @@ jobs:
 
       - name: Commit and push changes
         run: |
-          # Controlla se la cartella downloads esiste ed ha file al suo interno
           if [ -d "downloads" ]; then
             git add downloads/
           fi
           
-          # Verifica se ci sono reali modifiche da caricare
           if git diff --cached --quiet; then
-            echo "No changes to commit."
+            echo "Nessun nuovo file da caricare in questo turno."
             exit 0
           fi
           
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git commit -m "Automate Freesound audio download [skip ci]"
+          git commit -m "Download rapido pacchetto audio [skip ci]"
           git fetch origin "${GITHUB_REF_NAME}"
           git pull --rebase --autostash origin "${GITHUB_REF_NAME}" || true
           git push origin "HEAD:${GITHUB_REF_NAME}"
