@@ -12,7 +12,7 @@ def main():
 
     query = "gaming music"
     BATCH_SIZE = 100      # Limite di file da scaricare in questa specifica esecuzione
-    TARGET_TOTAL = 2000   # Obiettivo finale globale
+    TARGET_TOTAL = 1500   # Obiettivo finale globale
     
     os.makedirs("downloads", exist_ok=True)
     
@@ -23,7 +23,7 @@ def main():
     print(f"File attualmente presenti nella repository: {current_total_count}/{TARGET_TOTAL}")
     
     if current_total_count >= TARGET_TOTAL:
-        print("Obiettivo globale di 2000 file completato!")
+        print("Obiettivo globale di 1500 file completato!")
         sys.exit(0)
         
     downloaded_in_this_session = 0
