@@ -1,16 +1,16 @@
-name: Download Pixabay Audio
+name: Download Freesound Audio
 
 on:
   workflow_dispatch:
     inputs:
       query:
-        description: "Pixabay search query"
+        description: "Freesound search query"
         required: false
-        default: "music"
+        default: "gaming music"
       max_files:
         description: "Maximum number of files to download"
         required: false
-        default: "1000"
+        default: "3"
   schedule:
     - cron: "0 3 * * 1"
 
@@ -35,33 +35,30 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; else pip install requests; fi
 
       - name: Download audio assets
         env:
           PIXABAY_API_KEY: ${{ secrets.PIXABAY_API_KEY }}
-          PIXABAY_QUERY: ${{ github.event.inputs.query || 'music' }}
-          PIXABAY_MAX_FILES: ${{ github.event.inputs.max_files || '1000' }}
-          PIXABAY_OUTPUT_DIR: audio_assets
-          PIXABAY_DELAY_SECONDS: "1.5"
-          PIXABAY_PER_PAGE: "200"
         run: |
           python download_audio.py
 
       - name: Commit and push changes
         run: |
-          if git diff --cached --quiet && git diff --quiet; then
+          # Controlla se la cartella downloads esiste ed ha file al suo interno
+          if [ -d "downloads" ]; then
+            git add downloads/
+          fi
+          
+          # Verifica se ci sono reali modifiche da caricare
+          if git diff --cached --quiet; then
             echo "No changes to commit."
             exit 0
           fi
+          
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add audio_assets requirements.txt download_audio.py .github/workflows/audio-download.yml
-          if git diff --cached --quiet; then
-            echo "No staged changes to commit."
-            exit 0
-          fi
-          git commit -m "Automate Pixabay audio download"
+          git commit -m "Automate Freesound audio download [skip ci]"
           git fetch origin "${GITHUB_REF_NAME}"
           git pull --rebase --autostash origin "${GITHUB_REF_NAME}" || true
           git push origin "HEAD:${GITHUB_REF_NAME}"
