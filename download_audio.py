@@ -2,6 +2,7 @@ import os
 import sys
 import requests
 import time
+import json  # Aggiunto per gestire il file di indice
 
 def main():
     api_key = os.environ.get("PIXABAY_API_KEY")
@@ -9,7 +10,6 @@ def main():
         print("Errore: API Key non trovata.")
         sys.exit(1)
 
-    # Legge i valori che hai digitato a mano su GitHub
     try:
         page = int(os.environ.get("INPUT_PAGINA", 1))
         block_size = int(os.environ.get("INPUT_BLOCCO", 100))
@@ -17,7 +17,6 @@ def main():
         page = 1
         block_size = 100
 
-    # L'API di Freesound per una singola pagina eroga al massimo 150 risultati
     if block_size > 150:
         block_size = 150
 
@@ -52,7 +51,6 @@ def main():
 
         file_path = os.path.join("downloads", f"{audio_name}.mp3")
 
-        # Se il brano è già fisicamente nella tua cartella, lo salta
         if os.path.exists(file_path):
             continue
 
@@ -63,11 +61,23 @@ def main():
                 with open(file_path, "wb") as f:
                     f.write(res.content)
                 scaricati_in_questo_blocco += 1
-                time.sleep(0.3) # Pausa di sicurezza per non farsi bloccare l'IP
+                time.sleep(0.3)
         except Exception as e:
             print(f"Errore sul file {audio_name}: {e}")
 
     print(f"\nBlocco terminato. Nuovi brani scaricati: {scaricati_in_questo_blocco}")
+
+    # ==========================================
+    # NUOVA PARTE: GENERAZIONE AUTOMATICA DEL JSON
+    # ==========================================
+    print("Aggiornamento dell'indice delle canzoni...")
+    tutti_i_file = [f for f in os.listdir("downloads") if f.endswith(".mp3")]
+    
+    # Salva la lista completa in formato JSON
+    with open("downloads/songs.json", "w", encoding="utf-8") as jf:
+        json.dump(tutti_i_file, jf, ensure_ascii=False, indent=2)
+    
+    print(f"File 'downloads/songs.json' aggiornato con successo! Totale tracce indicizzate: {len(tutti_i_file)}")
 
 if __name__ == "__main__":
     main()
